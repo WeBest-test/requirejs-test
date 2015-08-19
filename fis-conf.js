@@ -14,7 +14,7 @@ fis.config.set('settings.optimizer.uglify-js', {
 
 //编译的文件
 fis.set('project.files', [
-    '/js/**'
+    '/js/**','*.js'
 ]);
 
 //忽略文件
@@ -38,25 +38,25 @@ fis.match('**.less', {
     release: false
 });
 
-fis.hook('module');
-fis.hook('module', {
-	mode: 'amd',
-	baseUrl: '//mtest.shuiqian.cc/public/sharing/v2/js',
-	paths: {
-		bedtime: './config/bedtime',
-		wx: '//res.wx.qq.com/open/js/jweixin-1.0.0',
-		base64:'./thirdparty/base64.min',
-		template:'./thirdparty/template-native'
-	},
-	shim: {
-		'base64': {
-			exports: 'Base64'
-		}
-	}
-});
-fis.match('/js/control/**.js', {
-  isMod: true // 标记匹配文件为组件
-});
+// fis.hook('module');
+// fis.hook('module', {
+	// mode: 'amd',
+	// baseUrl: '//mtest.shuiqian.cc/public/sharing/v2/js',
+	// paths: {
+		// bedtime: './config/bedtime',
+		// wx: '//res.wx.qq.com/open/js/jweixin-1.0.0',
+		// base64:'./thirdparty/base64.min',
+		// template:'./thirdparty/template-native'
+	// },
+	// shim: {
+		// 'base64': {
+			// exports: 'Base64'
+		// }
+	// }
+// });
+// fis.match('/js/control/**.js', {
+  // isMod: true // 标记匹配文件为组件
+// });
 
 
 //首页index.js 添加hash uglify-js
@@ -65,6 +65,10 @@ fis.match('/js/**.js', {
     optimizer: fis.plugin('uglify-js'),
     release: '/output/$0',
     domain: 'http://www.shuiqian.cc'
+});
+
+fis.match('*.js', {
+    useHash: true
 });
 
 //首页index.js 添加hash uglify-js
