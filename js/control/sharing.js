@@ -8,8 +8,11 @@ define(
         'template'
     ],
     function (bed, Base64, template) {
+        bed.templateConfig(template);
         var sharingInit = function () {
             jQuery(function ($) {
+
+                console.log(bed);
 
                 //console.log(bed.Login);
 
@@ -32,7 +35,7 @@ define(
                         var d = data.info;
                         d.bed = bed;
                         var html = template('selftmpl', d);
-
+                        console.log(html);
                         //console.log(html);
                         $(".self").html(html);
 

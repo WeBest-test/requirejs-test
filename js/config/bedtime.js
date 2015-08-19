@@ -5,7 +5,7 @@
 *
 * */
 (function(window,undefined){
-    var bed = {
+    var bed2 = {
         formatDate:function(val)   {
             var now = new Date(+val);
             var   year=now.getFullYear();
@@ -24,22 +24,40 @@
         wxIsTest:"",
         beatURL:"7xkfix.dl1.z0.glb.clouddn.com",
         userURL:"7xjfap.dl1.z0.glb.clouddn.com",
-        commentURL:"7xkfiz.dl1.z0.glb.clouddn.com"
+        commentURL:"7xkfiz.dl1.z0.glb.clouddn.com",
+        templateConfig:function(template){
+            template.config('openTag','{{');
+            template.config('closeTag','}}');
+            template.config('escape',false);
+        }
     };
 
     if(window.location.href.indexOf("test.shuiqian.cc")>=0){
-        bed.serverURL = "test.shuiqian.cc";
+        bed2.serverURL = "test.shuiqian.cc";
     }
     if(window.location.href.indexOf("mtest.shuiqian.cc")>=0){
-        bed.serverURL = "test.shuiqian.cc";
+        bed2.serverURL = "test.shuiqian.cc";
     }
 
     if ( typeof module === "object" && module && typeof module.exports === "object" ) {
-        module.exports = bed;
+        module.exports = bed2;
     } else if ( typeof define === "function" && define.amd ) {
-        define( [], function () { return bed; } );
+        define(
+            [],
+            function () {
+                if(typeof bed != "undefined"){
+
+                    return $.extend(bed, bed2);
+                }else{
+                    return bed2;
+                }
+            } );
     } else {
-        window.bed = bed;
+        if(typeof bed != "undefined"){
+            $.extend(bed, bed2);
+        }else{
+            window.bed = bed2;
+        }
     }
 
 })(window,undefined);

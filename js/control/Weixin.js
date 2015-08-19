@@ -2,15 +2,16 @@
  * 微信相关逻辑
  */
 define(
-    [],
-    function () {
+    ['bedtime','wx'],
+    function(bed,wx) {
 
         /**
          * 微信js sdk
          */
         var Weixin = {
             init: function () {
-                wx.config(weixin.config);
+                console.log(bed);
+                wx.config(bed.weixin.config);
                 wx.ready(function(){
                     Reply.voiceInit();
 
@@ -42,9 +43,6 @@ define(
                         }
                     });
                 });
-            },
-            config:{
-
             },
             testMedia: function () {
                 function hasGetUserMedia() {
