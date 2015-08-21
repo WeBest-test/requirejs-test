@@ -34,7 +34,11 @@ define(
                 }
             },
             redirect:function(){
-                window.location.href = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxab18db1751df337d&redirect_uri=http%3A%2F%2F"+bed.wxCallback+"%2FLogin%2Fwx%3Fbeatid%3D"+bed.beatid+(bed.wxIsTest?("%26test%3D"+bed.wxIsTest):"")+"&response_type=code&scope=snsapi_userinfo&state=STATE&connect_redirect=1#wechat_redirect"+"";
+                var url = "http://"+bed.wxCallback+"/Login/wx?beatid="+bed.beatid+(bed.wxIsTest?("&test="+bed.wxIsTest):"");
+                var currUrl = window.location.href;
+                url += "&return="+encodeURIComponent(currUrl);
+                var urlencoded = encodeURIComponent(url);
+                window.location.href = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxab18db1751df337d&redirect_uri="+urlencoded+"&response_type=code&scope=snsapi_userinfo&state=STATE&connect_redirect=1#wechat_redirect"+"";
             },
             logined:function(){
                 if(Login.getCookie("wxuid")){

@@ -19,9 +19,9 @@
             }
             return   year+"-"+month+"-"+date+" "+hour+":"+minute+":"+second;
         },
-        serverURL:"www.shuiqian.cc",
+        serverURL:"test.shuiqian.cc",
         wxCallback:"m.shuiqian.cc",
-        wxIsTest:"",
+        wxIsTest:"1",
         beatURL:"7xkfix.dl1.z0.glb.clouddn.com",
         userURL:"7xjfap.dl1.z0.glb.clouddn.com",
         commentURL:"7xkfiz.dl1.z0.glb.clouddn.com",
@@ -30,6 +30,20 @@
             template.config('closeTag','}}');
             template.config('escape',false);
         }
+    };
+
+    /**
+     * 调试用的数据 一级评论
+     * @type {{userid: number, beatid: number, returnid: number, returntype: number, returnvoice: string, duration: string}}
+     */
+    bed2.tmpData = {
+        userid:64,
+        beatid:22,
+        returncontent:"",
+        returnid:0,
+        returntype:2,
+        returnvoice:"",
+        duration:""
     };
 
     if(window.location.href.indexOf("test.shuiqian.cc")>=0){
@@ -45,7 +59,7 @@
         define(
             [],
             function () {
-                if(typeof bed != "undefined"){
+                if(typeof bed != "undefined"){ //bed已暴露在window中，扩展bed
 
                     return $.extend(bed, bed2);
                 }else{

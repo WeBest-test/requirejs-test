@@ -4,15 +4,15 @@
 define(
     [
         'bedtime',
+        'comp/Reply',
         'base64',
         'template'
     ],
-    function (bed, Base64, template) {
+    function (bed, Reply, Base64, template) {
         bed.templateConfig(template);
         var sharingInit = function () {
             jQuery(function ($) {
 
-                console.log(bed);
 
                 //console.log(bed.Login);
 
@@ -35,7 +35,6 @@ define(
                         var d = data.info;
                         d.bed = bed;
                         var html = template('selftmpl', d);
-                        console.log(html);
                         //console.log(html);
                         $(".self").html(html);
 
@@ -79,7 +78,7 @@ define(
                         /**
                          * 初始化回复(评论)按钮
                          */
-                        //Reply.init();
+                        Reply.init();
 
                     }
                 });

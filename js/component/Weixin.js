@@ -2,15 +2,14 @@
  * 微信相关逻辑
  */
 define(
-    ['bedtime','wx'],
-    function(bed,wx) {
+    ['bedtime','wx','comp/Reply'],
+    function(bed,wx,Reply) {
 
         /**
          * 微信js sdk
          */
         var Weixin = {
             init: function () {
-                console.log(bed);
                 wx.config(bed.weixin.config);
                 wx.ready(function(){
                     Reply.voiceInit();

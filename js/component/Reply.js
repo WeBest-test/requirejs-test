@@ -2,8 +2,8 @@
  * 回复相关逻辑
  */
 define(
-    [],
-    function () {
+    ['comp/Login','bedtime'],
+    function (Login,bed) {
 
         var Reply = {
 
@@ -80,7 +80,6 @@ define(
             replyOneHandler:function(e) {
                 var that = this;
                 Reply.commentId = ($(that).data("comment-id")?$(that).data("comment-id"):0);
-                console.log(e);
                 if($(e.target).is("#bbtn")){//如果当前点击的是声音主题播放按钮
 
                 }else if($(e.target).is(".cbtn")){//如果当前点击的是一级评论播放按钮

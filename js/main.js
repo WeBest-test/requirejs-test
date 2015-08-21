@@ -9,23 +9,24 @@ requirejs.config({
         bedtime: './config/bedtime',
         wx: '//res.wx.qq.com/open/js/jweixin-1.0.0',
         base64:'./thirdparty/base64.min',
-        template:'./thirdparty/template-native'
+        template:'./thirdparty/template-native',
+        comp:'./component',
+        cont:'./control'
     },
     shim: {
         'base64': {
             exports: 'Base64'
         }
-    }
+    },
+    urlArgs: "bust=" +  (new Date()).getTime()
 });
 require(
     [
-        'wx',
-        'control/Login',
-        'control/Reply',
-        'control/Weixin',
-        'control/Sharing',
+        'comp/Weixin',
+        'cont/Sharing',
+        'tmpl/selftmpl'
     ],
-    function(wx,Login,Reply,Weixin,Sharing){
+    function(Weixin,Sharing,t){
         Sharing.init();
         Weixin.init();
     }
