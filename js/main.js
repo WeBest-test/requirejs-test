@@ -3,6 +3,24 @@
  * By 刘各欢
  * 20150818
  * */
+var bust = function(){
+    var now = new Date();
+    var year = now.getFullYear();
+    var month = now.getMonth() + 1;
+    var date = now.getDate();
+    var h = now.getHours();
+    var m = now.getMinutes();
+    var M = now.getSeconds();
+    if(M<=20){
+        M = 0;
+    }else if(M <=40){
+        M = 1;
+    }else{
+        M = 2;
+    }
+    return ""+year+month+date+h+m+M;
+}
+
 requirejs.config({
     //baseUrl: '//mtest.shuiqian.cc/public/sharing/v2/js',
     paths: {
@@ -18,16 +36,18 @@ requirejs.config({
             exports: 'Base64'
         }
     },
-    urlArgs: "bust=" +  (new Date()).getTime()
+    urlArgs: "bust=" +  bust()
 });
 require(
     [
         'comp/Weixin',
-        'cont/Sharing',
+        'comp/Dom',
+        'cont/Comments_child',
         'tmpl/selftmpl'
     ],
-    function(Weixin,Sharing,t){
-        Sharing.init();
+    function(Weixin,Dom,Comments,t){
+        Comments.init();
         Weixin.init();
+        Dom.removeLoading();
     }
 );

@@ -88,7 +88,7 @@ define(
                 var r = Base64.encode(req);
                 var code = 1704;
                 $.ajax({
-                    type: "post",
+                    type: "get",
                     url: "//" + bed.serverURL + "/Get_beatcomments_mp3/info?data=" + r,
                     dataType: "json",
                     success: function (data) {

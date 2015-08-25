@@ -1,1 +1,1 @@
-fis3 release -d ./out
+fis3 release -d ./ -w

@@ -14,7 +14,7 @@ fis.config.set('settings.optimizer.uglify-js', {
 
 //编译的文件
 fis.set('project.files', [
-    '/js/**','*.js'
+    '/js/main.js'
 ]);
 
 //忽略文件
@@ -25,18 +25,18 @@ fis.set('project.ignore', ['.git/**',
 //将符合规则的文件进行过滤 编译 并转移到release目录 
 
 //所有css文件
-fis.match('/public/**.css', {
-    useHash: true,
-    optimizer: fis.plugin('clean-css'),
-    release: '/output/$0',
-    domain: 'http://www.shuiqian.cc'
-});
+// fis.match('/public/**.css', {
+    // useHash: true,
+    // optimizer: fis.plugin('clean-css'),
+    // release: '/output/$0',
+    // domain: 'http://www.shuiqian.cc'
+// });
 
 //less文件 忽略
-fis.match('**.less', {
+// fis.match('**.less', {
     // 设置 release 为 FALSE，不再产出此文件
-    release: false
-});
+    // release: false
+// });
 
 // fis.hook('module');
 // fis.hook('module', {
@@ -63,7 +63,7 @@ fis.match('**.less', {
 fis.match('/js/**.js', {
     useHash: true,
     optimizer: fis.plugin('uglify-js'),
-    release: '/output/$0',
+    release: './$0',
     domain: 'http://www.shuiqian.cc'
 });
 
@@ -71,10 +71,10 @@ fis.match('*.js', {
     useHash: true
 });
 
-//首页index.js 添加hash uglify-js
-fis.match('/js/**.min.js', {
-    useHash: false,
-    optimizer: null,
-    release: '/output/$0',
-    domain: 'http://www.shuiqian.cc'
-});
+// 首页index.js 添加hash uglify-js
+// fis.match('/js/**.min.js', {
+    // useHash: false,
+    // optimizer: null,
+    // release: '/output/$0',
+    // domain: 'http://www.shuiqian.cc'
+// });
