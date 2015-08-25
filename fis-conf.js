@@ -64,6 +64,7 @@ fis.match('/js/**.js', {
     useHash: true,
     optimizer: fis.plugin('uglify-js'),
     release: './$0',
+	rExt: '.min.js',
     domain: 'http://www.shuiqian.cc'
 });
 
