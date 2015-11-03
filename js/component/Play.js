@@ -7,10 +7,10 @@ define(
 
         var osrc1, osrc2;
         var ai1 = new Image();
-        ai1.src = "" + bed.base + "public/sharing/img/plays.gif?2";
+        ai1.src = "" + bed.base + "public/sharing/v2/img/play_1.gif";
 
         var ai2 = new Image();
-        ai2.src = "" + bed.base + "public/sharing/img/plays.gif?2";
+        ai2.src = "" + bed.base + "public/sharing/v2/img/play_1.gif";
 
         /**
          * 一级评论播放

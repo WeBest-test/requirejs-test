@@ -7,9 +7,11 @@ define(
         'comp/Reply',
         'base64',
         'template',
-        'comp/Play'
+        'comp/Play',
+        'comp/Download',
+        'comp/Dom'
     ],
-    function (bed, Reply, Base64, template,Play) {
+    function (bed, Reply, Base64, template,Play,download,Dom) {
         bed.templateConfig(template);
         var c = function () {
             jQuery(function ($) {
@@ -18,86 +20,31 @@ define(
 
                 $(".download").click(download);
 
-                changeWidth();
-                $(window).resize(changeWidth);
+                //Dom.initSharingBottomWidth();
+                $(window).resize(Dom.initSharingBottomWidth);
 
 
-                /**
-                 * 获取当前页面声音的详情，如用户、时间、分类等
-                 */
-                $.ajax({
-                    type: "post",
-                    url: "//" + bed.serverURL + "/Get_beatinfo_mp3/info",
-                    data: {userid: bed.currUserId, beatid: bed.beatid},//TODO PHP Get方式
-                    dataType: "json",
-                    success: function (data) {
-                        //console.log(data);
-                        var d = data.info;
-                        d.bed = bed;
-                        var html = template('selftmpl', d);
-                        //console.log(html);
-                        $(".self").html(html);
 
-                        if (d.sex == 1) {
-                            $(".self .sexage").css('background-image', 'url(' + bed.base + 'public/sharing/img/boy.png)');
-
-                        } else if (d.sex == 2) {
-                            $(".self .sexage").css('background-image', 'url(' + bed.base + 'public/sharing/img/girl.png)');
-                        } else {
-
-                        }
-                        $("title").html(d.title);
-
-                        //播放控制
-                        var ai = new Image();
-                        ai.src = "" + bed.base + "public/sharing/img/playl.gif?1";
-                        $("#bbtn").off("click");
-
-                        $("#bbtn").click(function () {
-                            if ($("audio.playing")[0]) {
-                                var p = $("audio.playing")[0];
-                                p.pause();
-                                p.currentTime = 0.0;
-                            }
-
-                            var that = this;
-                            var a = $(this).next("audio")[0];
-                            if (!$(a).hasClass("playing")) {
-                                osrc = that.src;
-                                that.src = ai.src;
-                                a.play();
-                                $(a).addClass("playing");
-                            }
-                            $(a).off("ended pause");
-                            $(a).on("ended pause", function () {
-                                $(a).removeClass("playing");
-                                that.src = osrc;
-                            });
-                        });
-
-                        /**
-                         * 初始化回复(评论)按钮
-                         */
-                        Reply.init();
-
-                    }
-                });
 
                 /*获取当前页面的评论列表*/
-                var req = 'userid=' + bed.currUserId + '&beatid=' + bed.beatid + '&page=1';
+                var req = 'userid=' + bed.currUserId + '&beatid=' + bed.beatid + '&commentid=' + bed.currCommentId + '&page=1';
                 var r = Base64.encode(req);
-                var code = 1704;
+                var code = 3804;
                 $.ajax({
                     type: "get",
                     url: "//" + bed.serverURL + "/Get_beatcomments_child_mp3/info?data=" + r,
                     dataType: "json",
                     success: function (data) {
+                        Dom.removeLoading();
                         //var d = data.info;
                         data.bed = bed;
                         var html = template('otherstmpl', data);
 
                         $(".others").html(html);
-                        changeWidth();
+
+                        Reply.init(2);
+                        Dom.initSharingBottomWidth();
+                        Dom.fixWhiteHeight();
 
                         Play.cplay();
                         Play.c2play();
@@ -107,11 +54,19 @@ define(
                         $("body").children().on("click", ".cmtmore", download);
 
 
-                        if (data.code == 1704) { //滑动加载下一页
+                        if (data.code == code) { //滑动加载下一页
+
+                            var sH = document.documentElement.scrollTop || window.pageYOffset || document.body.scrollTop;
+                            if (( viewportTop() - $(window).height() - (sH) < 200 ) && (3804 == code)) {
+                                ajaxLoadComment(nowPage);
+                                nowPage += 1;
+                            }
+
+
 
                             $(window).scroll(function () {
                                 var sH = document.documentElement.scrollTop || window.pageYOffset || document.body.scrollTop;
-                                if (( viewportTop() - $(window).height() - (sH) < 200 ) && (code == 1704)) {
+                                if (( viewportTop() - $(window).height() - (sH) < 200 ) && (3804 == code)) {
                                     ajaxLoadComment(nowPage);
                                     nowPage += 1;
                                 } else if (viewportTop() - $(window).height() - (sH) >= 200) {
@@ -120,8 +75,10 @@ define(
 
 
                         }
+
                     }
                 });
+
 
 
                 /**
@@ -129,7 +86,7 @@ define(
                  * @returns {jQuery.top|jQuery}
                  */
                 var viewportTop = function () {
-                    return $(".otherswrap:last").offset().top;
+                    return $(".cmtwrap:last").offset().top;
                 };
 
                 /**
@@ -141,26 +98,27 @@ define(
 
                 /*ajax方式获取指定页的评论，并添加到DOM中去*/
                 function ajaxLoadComment(page) {
-                    req = 'userid=' + bed.currUserId + '&beatid=' + bed.beatid + '&page=' + (page);
-                    r = Base64.encode(req);
+                    var req = 'userid=' + bed.currUserId + '&beatid=' + bed.beatid + '&commentid=' + bed.currCommentId + '&page=' + nowPage;
+                    var r = Base64.encode(req);
                     $.ajax({
                         type: "post",
-                        url: "//" + bed.serverURL + "/Get_beatcomments_mp3/info?data=" + r,
+                        url: "//" + bed.serverURL + "/Get_beatcomments_child_mp3/info?data=" + r,
                         dataType: "json",
                         async: false,
                         beforeSend: function () {
-                            $(".others").append("<div id='loading' style='position: absolute;bottom: 0'>加载中，请稍等</div>");
+                            //$(".others").append("<div id='loading' style='position: absolute;bottom: 0'>加载中，请稍等</div>");
                         },
                         success: function (data) {
-                            data.bed = bed;
-                            var html = template('otherstmpl', data);
-                            $(".others").append(html);
-
-                            changeWidth();
-
                             code = data.code;
+                            if(data.info == "")
+                                return;
+                            data.bed = bed;
+                            var html = template('cmtwraptmpl', data);
+                            $(".cmtwrap:last").after(html);
 
-                            $(".others #loading").remove();
+                            Dom.initSharingBottomWidth();
+                            Dom.fixWhiteHeight();
+
 
                             Play.cplay();
                             Play.c2play();
@@ -171,13 +129,7 @@ define(
                 }
 
 
-                /**
-                 * 改变wrap的宽度 方便margin 0 auto 居中
-                 */
-                function changeWidth() {
-                    $(".others .otherswrap").width(parseInt($(".others").width() * 0.95));//对像素值取整数
-                    $(".others .contentwrap").width($(".others .otherswrap").width() - $(".others .headpic").width());
-                }
+
 
 
                 /**
@@ -197,27 +149,6 @@ define(
                  * 预读播放中按钮gif动画
                  */
                 var osrc;
-
-                function download() {
-                    var bUA = window.navigator.userAgent;
-
-                    var now = new Date();
-                    var year = now.getFullYear();
-                    var month = now.getMonth() + 1;
-                    var date = now.getDate();
-
-                    if (bUA.indexOf("Android") >= 0) {
-                        window.location.href = "http://" + bed.serverURL + "/Download/";
-                    } else if (bUA.indexOf("iPhone") >= 0) {
-                        alert("正在开发中");
-                    } else if (bUA.indexOf("iPad") >= 0) {
-                        //window.location.href = "https://itunes.apple.com/app/id947205428";
-                        alert("正在开发中");
-                        //window.location.href = "https://itunes.apple.com/app/id947205428";
-                    } else {
-                        alert("抱歉，暂不支持您的手机系统！");
-                    }
-                }
 
 
             });

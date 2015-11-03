@@ -1,25 +1,28 @@
 /**
- * 对分享页面就行初始化
+ * 对二级回复页面就行初始化
  */
 define(
     [
         'bedtime',
         'comp/Reply',
         'base64',
-        'template'
+        'template',
+        'comp/Play',
+        'comp/Download',
+        'comp/Dom',
+        'comp/Location'
     ],
-    function (bed, Reply, Base64, template) {
+    function (bed, Reply, Base64, template,Play,download,Dom,Loc) {
         bed.templateConfig(template);
-        var sharingInit = function () {
+        var c = function () {
             jQuery(function ($) {
 
 
-                //console.log(bed.Login);
 
                 $(".download").click(download);
 
-                changeWidth();
-                $(window).resize(changeWidth);
+                //Dom.initSharingBottomWidth();
+                $(window).resize(Dom.initSharingBottomWidth);
 
 
                 /**
@@ -27,30 +30,50 @@ define(
                  */
                 $.ajax({
                     type: "post",
-                    url: "//" + bed.serverURL + "/Get_beatinfo_mp3/info",
+                    url: "//" + bed.serverURL + "/Get_beatinfo_one_mp3/info",
                     data: {userid: bed.currUserId, beatid: bed.beatid},//TODO PHP Get方式
                     dataType: "json",
                     success: function (data) {
+                        Dom.removeLoading();
                         //console.log(data);
                         var d = data.info;
+
+                        Loc.getLoc(
+                            function(){ //成功获取到位置后的回调函数
+                                if(bed.loc){
+                                    var ddd = Loc.getDistance(d.latitude,d.longitude,bed.loc.lat,bed.loc.lng);
+                                    $("span.distance").html(ddd+"km");
+                                }else{
+                                    $("span.distance").html("未知");
+                                }
+
+                                Dom.removeLoading();
+
+                            }
+                        );
+
                         d.bed = bed;
                         var html = template('selftmpl', d);
                         //console.log(html);
                         $(".self").html(html);
 
+
                         if (d.sex == 1) {
                             $(".self .sexage").css('background-image', 'url(' + bed.base + 'public/sharing/img/boy.png)');
 
-                        } else if (d.sex == 2) {
+                        } else if (d.sex == 0 || d.sex == 2) {
                             $(".self .sexage").css('background-image', 'url(' + bed.base + 'public/sharing/img/girl.png)');
                         } else {
 
                         }
                         $("title").html(d.title);
 
+                        //标题居中
+                        //$(".title").css('left',-($(".title").offset().left+$('.title').width()/2-$('html').width()/2));
+
                         //播放控制
                         var ai = new Image();
-                        ai.src = "" + bed.base + "public/sharing/img/playl.gif?1";
+                        ai.src = "" + bed.base + "public/sharing/v2/img/pausebtn.png";
                         $("#bbtn").off("click");
 
                         $("#bbtn").click(function () {
@@ -78,7 +101,8 @@ define(
                         /**
                          * 初始化回复(评论)按钮
                          */
-                        Reply.init();
+                        Reply.init(1);
+
 
                     }
                 });
@@ -92,19 +116,24 @@ define(
                     url: "//" + bed.serverURL + "/Get_beatcomments_mp3/info?data=" + r,
                     dataType: "json",
                     success: function (data) {
+                        Dom.removeLoading();
                         //var d = data.info;
                         data.bed = bed;
                         var html = template('otherstmpl', data);
 
                         $(".others").html(html);
-                        changeWidth();
 
-                        cplay();
-                        c2play();
+                        Dom.initSharingBottomWidth();
+                        Dom.fixWhiteHeight();
+
+                        Play.cplay();
+                        Play.c2play();
 
                         //二级回复页面
                         //$("body").on("click",".cmtmore",showCmt);
-                        $("body").children().on("click", ".cmtmore", download);
+                        $("body").children().on("click", ".cmtmore", function(){
+                            window.location.href = bed.base + 'Comments_child?commentid='+$(this).data('comment-id')+'&beatid='+bed.beatid;
+                        });
 
 
                         if (data.code == 1704) { //滑动加载下一页
@@ -120,6 +149,7 @@ define(
 
 
                         }
+
                     }
                 });
 
@@ -149,21 +179,26 @@ define(
                         dataType: "json",
                         async: false,
                         beforeSend: function () {
-                            $(".others").append("<div id='loading' style='position: absolute;bottom: 0'>加载中，请稍等</div>");
+                            //$(".others").append("<div id='loading' style='position: absolute;bottom: 0'>加载中，请稍等</div>");
                         },
                         success: function (data) {
                             data.bed = bed;
                             var html = template('otherstmpl', data);
+
+                            /**
+                             * 添加分割线
+                             * */
+                            html = '<hr class="hr" />'+html;
                             $(".others").append(html);
 
-                            changeWidth();
+                            Dom.initSharingBottomWidth();
+                            Dom.fixWhiteHeight();
 
                             code = data.code;
 
-                            $(".others #loading").remove();
 
-                            cplay();
-                            c2play();
+                            Play.cplay();
+                            Play.c2play();
 
                         }
                     });
@@ -171,13 +206,6 @@ define(
                 }
 
 
-                /**
-                 * 改变wrap的宽度 方便margin 0 auto 居中
-                 */
-                function changeWidth() {
-                    $(".others .otherswrap").width(parseInt($(".others").width() * 0.95));//对像素值取整数
-                    $(".others .contentwrap").width($(".others .otherswrap").width() - $(".others .headpic").width());
-                }
 
 
                 /**
@@ -196,105 +224,9 @@ define(
                 /**
                  * 预读播放中按钮gif动画
                  */
-                var osrc, osrc1, osrc2;
-                var ai1 = new Image();
-                ai1.src = "" + bed.base + "public/sharing/img/plays.gif?2";
-
-                var ai2 = new Image();
-                ai2.src = "" + bed.base + "public/sharing/img/plays.gif?2";
-
-                /**
-                 * 一级评论播放
-                 */
-                function cplay() {
-                    if ($("audio.playing")[0]) {
-                        var p = $("audio.playing")[0];
-                        p.pause();
-                        p.currentTime = 0.0;
-                    }
-
-                    //一级回复播放控制
-                    var c = $(".cbtn");
-                    c.off("click");
-
-                    c.click(function () {
-
-                        if ($("audio.playing")[0]) {
-                            var p = $("audio.playing")[0];
-                            p.pause();
-                            p.currentTime = 0.0;
-                        }
-
-                        var that = this;
-                        var a = $(this).next("audio")[0];
-                        if (!$(a).hasClass("playing")) {
-                            osrc1 = that.src;
-                            that.src = ai1.src;
-                            a.play();
-                            $(a).addClass("playing");
-                        }
-                        $(a).off("ended pause");
-                        $(a).on("ended pause", function () {
-                            $(a).removeClass("playing");
-                            that.src = osrc1;
-                        });
-                    });
-                }
-
-                /**
-                 * 二级评论播放
-                 */
-                function c2play() {
+                var osrc;
 
 
-                    //二级回复播放控制
-                    var c2 = $(".c2btn");
-                    c2.off("click");
-
-                    c2.click(function () {
-
-                        if ($("audio.playing")[0]) {
-                            var p = $("audio.playing")[0];
-                            p.pause();
-                            p.currentTime = 0.0;
-                        }
-
-                        var that = this;
-                        var a = $(this).next("audio")[0];
-                        if (!$(a).hasClass("playing")) {
-                            osrc2 = that.src;
-                            that.src = ai2.src;
-                            a.play();
-                            $(a).addClass("playing");
-                        }
-                        $(a).off("ended pause");
-                        $(a).on("ended pause", function () {
-                            $(a).removeClass("playing");
-                            that.src = osrc2;
-                        });
-                    });
-                }
-
-                function download() {
-                    var bUA = window.navigator.userAgent;
-
-                    var now = new Date();
-                    var year = now.getFullYear();
-                    var month = now.getMonth() + 1;
-                    var date = now.getDate();
-
-                    if (bUA.indexOf("Android") >= 0) {
-                        window.location.href = "http://" + bed.serverURL + "/Download/";
-                    } else if (bUA.indexOf("iPhone") >= 0) {
-                        alert("正在开发中");
-                    } else if (bUA.indexOf("iPad") >= 0) {
-                        //window.location.href = "https://itunes.apple.com/app/id947205428";
-                        alert("正在开发中");
-                        //window.location.href = "https://itunes.apple.com/app/id947205428";
-                    } else {
-                        alert("抱歉，暂不支持您的手机系统！");
-                    }
-                }
 
 
             });
@@ -303,7 +235,7 @@ define(
 
 
         var exports = {
-            init: sharingInit
+            init: c
         };
         return exports;
 

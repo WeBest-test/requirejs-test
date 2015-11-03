@@ -19,7 +19,7 @@ var bust = function(){
         M = 2;
     }
     return ""+year+month+date+h+m+M;
-}
+};
 
 requirejs.config({
     //baseUrl: '//mtest.shuiqian.cc/public/sharing/v2/js',
@@ -36,18 +36,15 @@ requirejs.config({
             exports: 'Base64'
         }
     },
+    waitSeconds:15,
     urlArgs: "bust=" +  bust()
 });
+//不把具体逻辑放在main中，防止main文件被浏览器长时间缓存
 require(
     [
-        'comp/Weixin',
-        'comp/Dom',
-        'cont/Comments_child',
-        'tmpl/selftmpl'
+        'app/'+bed.appName
     ],
-    function(Weixin,Dom,Comments,t){
-        Comments.init();
-        Weixin.init();
-        Dom.removeLoading();
+    function(app){
+        app.init();
     }
 );
